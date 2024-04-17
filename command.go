@@ -34,7 +34,7 @@ var InitCommand = &cli.Command{
 		log.Infof("init come on")
 		cmd := context.Args().Get(0)
 		log.Infof("command %s", cmd)
-		err := container.RunContainerInitProcess(cmd)
+		err := container.RunContainerInitProcess(cmd, nil)
 		return err
 	},
 }
