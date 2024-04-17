@@ -9,13 +9,15 @@ type CgroupManager struct {
 	//定义cgroup需要的路径
 	Path string
 	// 资源限制
-	Resource *subsystems.ResourceConfig
+	Resource   *subsystems.ResourceConfig
+	Subsystems []subsystems.Subsystem
 }
 
 //创建一个对象
 func NewCgroupManager(path string) *CgroupManager {
 	return &CgroupManager{
-		Path: path,
+		Path:       path,
+		Subsystems: subsystems.SubsystemsIns,
 	}
 }
 
@@ -30,7 +32,7 @@ func (c *CgroupManager) Destroy() error {
 }
 
 func (c *CgroupManager) Apply(pid int) error {
-	for _, subSysIns := range subsystems.SubsystemsIns {
+	for _, subSysIns := range c.Subsystems {
 		if err := subSysIns.Apply(c.Path, pid); err != nil {
 			logrus.Warnf("remove cgroup fail %v", err)
 		}
@@ -38,8 +40,11 @@ func (c *CgroupManager) Apply(pid int) error {
 }
 
 func (c *CgroupManager) Set(res *subsystems.ResourceConfig) error {
-	for _, subSysIns := range subsystems.SubsystemsIns {
-		subSysIns.Set(c.Path, res)
+	for _, subSysIns := range c.Subsystems {
+		err := subSysIns.Set(c.Path, res)
+		if err != nil {
+			logrus.Errorf("apply subsystem:%s err:%s", subSysIns.Name(), err)
+		}
 	}
 	return nil
 }

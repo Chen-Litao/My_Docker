@@ -2,7 +2,7 @@ package subsystems
 
 type ResourceConfig struct {
 	MemoryLimit string
-	CpuShare    string
+	CpuCfsQuota int
 	CpuSet      string
 }
 

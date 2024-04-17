@@ -1,1 +1,36 @@
 package subsystems
+
+import (
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"myself_docker/constant"
+	"os"
+	"path"
+)
+
+type CpusetSubSystem struct {
+}
+
+func (s *CpusetSubSystem) Name() string {
+	return "cpuset"
+}
+
+func (s *CpusetSubSystem) Set(cgroupPath string, res *ResourceConfig) error {
+	if res.CpuSet == "" {
+		logrus.Warnf("CpuSet set is '0' !!!")
+		return nil
+	}
+	subCgroupPath, err := getCgroupPath(cgroupPath, true)
+	if err != nil {
+		return err
+	}
+	if res.CpuSet != "" {
+		if err = os.WriteFile(path.Join(subCgroupPath, "cpuset.cpus"),
+			[]byte(res.CpuSet),
+			constant.Perm0644); err != nil {
+			return fmt.Errorf("set cgroup cpuset fail %v", err)
+		}
+	}
+
+	return nil
+}
