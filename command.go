@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli"
 	"myself_docker/cgroups/subsystems"
 	"myself_docker/container"
 )
 
-var RunCommand = &cli.Command{
+var RunCommand = cli.Command{
 	Name:  "run",
 	Usage: "启动一个容器 gocker run -it [command]",
 	Flags: []cli.Flag{
@@ -30,14 +30,16 @@ var RunCommand = &cli.Command{
 		},
 	},
 	Action: func(context *cli.Context) error {
-		if context.Args().Len() < 1 {
+		if len(context.Args()) < 1 {
 			return fmt.Errorf(" Missing container command ")
 		}
+		//获取的是非flag后面的值
 		var cmdArray []string
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
 		tty := context.Bool("it")
+		//flag后面的所有参数会被记录到这里
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("mem"),
 			CpuSet:      context.String("cpuset"),
@@ -49,7 +51,7 @@ var RunCommand = &cli.Command{
 	},
 }
 
-var InitCommand = &cli.Command{
+var InitCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
 	Action: func(context *cli.Context) error {

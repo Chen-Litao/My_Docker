@@ -35,8 +35,10 @@ func (c *CgroupManager) Apply(pid int) error {
 	for _, subSysIns := range c.Subsystems {
 		if err := subSysIns.Apply(c.Path, pid); err != nil {
 			logrus.Warnf("remove cgroup fail %v", err)
+			return err
 		}
 	}
+	return nil
 }
 
 func (c *CgroupManager) Set(res *subsystems.ResourceConfig) error {

@@ -40,3 +40,16 @@ func (s *CpuSubSystem) Set(cgroupPath string, res *ResourceConfig) error {
 	}
 	return nil
 }
+
+func (s *CpuSubSystem) Apply(cgroupPath string, pid int) error {
+	return applyCgroup(pid, cgroupPath)
+}
+
+// Remove 删除cgroupPath对应的cgroup
+func (s *CpuSubSystem) Remove(cgroupPath string) error {
+	subCgroupPath, err := getCgroupPath(cgroupPath, false)
+	if err != nil {
+		return err
+	}
+	return os.RemoveAll(subCgroupPath)
+}

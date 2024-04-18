@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli"
 	"os"
 )
 
@@ -12,7 +12,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "selfDocker"
 	app.Usage = usage
-	app.Commands = []*cli.Command{
+	app.Commands = []cli.Command{
 		InitCommand,
 		RunCommand,
 	}
