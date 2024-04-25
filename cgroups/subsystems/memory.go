@@ -25,7 +25,7 @@ func (s *MemorySubSystem) Set(cgroupPath string, res *ResourceConfig) error {
 	if err != nil {
 		return err
 	}
-	if res.CpuSet != "" {
+	if res.MemoryLimit != "" {
 		if err = os.WriteFile(path.Join(subCgroupPath, "memory.max"),
 			[]byte(res.MemoryLimit),
 			constant.Perm0644); err != nil {
