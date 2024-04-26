@@ -13,8 +13,9 @@ func main() {
 	app.Name = "selfDocker"
 	app.Usage = usage
 	app.Commands = []cli.Command{
-		InitCommand,
-		RunCommand,
+		initCommand,
+		runCommand,
+		commitCommand,
 	}
 	//设置log输出格式
 	app.Before = func(context *cli.Context) error {

@@ -8,7 +8,7 @@ import (
 	"myself_docker/container"
 )
 
-var RunCommand = cli.Command{
+var runCommand = cli.Command{
 	Name:  "run",
 	Usage: "启动一个容器 gocker run -it [command]",
 	Flags: []cli.Flag{
@@ -56,7 +56,22 @@ var RunCommand = cli.Command{
 	},
 }
 
-var InitCommand = cli.Command{
+var commitCommand = cli.Command{
+	Name:  "commit",
+	Usage: "commit container to image",
+	Action: func(context *cli.Context) error {
+		log.Infof("commit come on")
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("missing image name")
+		}
+		imageName := context.Args().Get(0)
+		log.Infof("command %s", imageName)
+		err := container.CommitContainer(imageName)
+		return err
+	},
+}
+
+var initCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
 	Action: func(context *cli.Context) error {
