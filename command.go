@@ -28,6 +28,10 @@ var RunCommand = cli.Command{
 			Name:  "cpuset",
 			Usage: "cpuset limit,e.g.: -cpuset 2,4", // 限制进程 cpu 使用率
 		},
+		&cli.StringFlag{
+			Name:  "v",
+			Usage: "volume limit,e.g.: -v /source/config:/target/config,", // 限制进程 cpu 使用率
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -46,7 +50,8 @@ var RunCommand = cli.Command{
 			CpuCfsQuota: context.Int("cpu"),
 		}
 		log.Info("resConf:", resConf)
-		Run(tty, cmdArray, resConf)
+		volume := context.String("v")
+		Run(tty, cmdArray, resConf, volume)
 		return nil
 	},
 }

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig) {
-	parent, writePipe := container.NewParentProcess(tty)
+func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume string) {
+	parent, writePipe := container.NewParentProcess(tty, volume)
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
@@ -23,9 +23,8 @@ func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig) {
 	defer cgroupManager.Destroy()
 	_ = cgroupManager.Set(resConf)
 	_ = cgroupManager.Apply(parent.Process.Pid)
-
 	_ = parent.Wait()
-	container.DeleteWorkSpace("/root/")
+	container.DeleteWorkSpace("/root/", volume)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
