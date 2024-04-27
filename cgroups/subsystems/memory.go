@@ -2,7 +2,6 @@ package subsystems
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"myself_docker/constant"
 	"os"
 	"path"
@@ -18,7 +17,6 @@ func (s *MemorySubSystem) Name() string {
 
 func (s *MemorySubSystem) Set(cgroupPath string, res *ResourceConfig) error {
 	if res.MemoryLimit == "" {
-		logrus.Warnf("Memory set is '0' !!!")
 		return nil
 	}
 	subCgroupPath, err := getCgroupPath(cgroupPath, true)
@@ -44,5 +42,5 @@ func (s *MemorySubSystem) Remove(cgroupPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.RemoveAll(subCgroupPath)
+	return os.Remove(subCgroupPath)
 }
