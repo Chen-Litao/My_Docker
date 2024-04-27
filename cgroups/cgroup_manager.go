@@ -23,7 +23,7 @@ func NewCgroupManager(path string) *CgroupManager {
 
 //释放cgroup
 func (c *CgroupManager) Destroy() error {
-	for _, subSysIns := range subsystems.SubsystemsIns {
+	for _, subSysIns := range c.Subsystems {
 		if err := subSysIns.Remove(c.Path); err != nil {
 			logrus.Warnf("remove cgroup fail %v", err)
 		}

@@ -2,7 +2,6 @@ package subsystems
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"myself_docker/constant"
 	"os"
 	"path"
@@ -23,7 +22,6 @@ func (s *CpuSubSystem) Name() string {
 
 func (s *CpuSubSystem) Set(cgroupPath string, res *ResourceConfig) error {
 	if res.CpuCfsQuota == 0 {
-		logrus.Warnf("CpuCfsQuota set is '0' !!!")
 		return nil
 	}
 	subCgroupPath, err := getCgroupPath(cgroupPath, true)
@@ -51,5 +49,5 @@ func (s *CpuSubSystem) Remove(cgroupPath string) error {
 	if err != nil {
 		return err
 	}
-	return os.RemoveAll(subCgroupPath)
+	return os.Remove(subCgroupPath)
 }
