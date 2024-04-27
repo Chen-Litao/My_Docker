@@ -45,19 +45,6 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	//cmd := exec.Command("/proc/self/exe", "init")
-	//cmd.SysProcAttr = &syscall.SysProcAttr{
-	//	Cloneflags: syscall.CLONE_NEWUTS |
-	//		syscall.CLONE_NEWPID |
-	//		syscall.CLONE_NEWNS |
-	//		syscall.CLONE_NEWNET |
-	//		syscall.CLONE_NEWIPC,
-	//}
-	//if tty {
-	//	cmd.Stdin = os.Stdin
-	//	cmd.Stdout = os.Stdout
-	//	cmd.Stderr = os.Stderr
-	//}
 	cmd.ExtraFiles = []*os.File{readPipe}
 	rootPath := "/root"
 	NewWorkSpace(rootPath, volume)

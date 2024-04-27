@@ -12,29 +12,33 @@ var runCommand = cli.Command{
 	Name:  "run",
 	Usage: "启动一个容器 gocker run -it [command]",
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
+		cli.BoolFlag{
 			Name:  "it",
 			Usage: "是否启用命令行交互模式",
 		},
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "mem", // 限制进程内存使用量，为了避免和 stress 命令的 -m 参数冲突 这里使用 -mem,到时候可以看下解决冲突的方法
 			Usage: "memory limit,e.g.: -mem 100m",
 		},
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "cpu",
 			Usage: "cpu quota,e.g.: -cpu 100", // 限制进程 cpu 使用率
 		},
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "cpuset",
 			Usage: "cpuset limit,e.g.: -cpuset 2,4", // 限制进程 cpu 使用率
 		},
-		&cli.StringFlag{
+		cli.StringFlag{
 			Name:  "v",
 			Usage: "volume limit,e.g.: -v /source/config:/target/config,", // 限制进程 cpu 使用率
 		},
 		cli.BoolFlag{
 			Name:  "d",
 			Usage: "detach container,run background",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "container name",
 		},
 	},
 	Action: func(context *cli.Context) error {
@@ -63,7 +67,8 @@ var runCommand = cli.Command{
 		}
 		log.Info("resConf:", resConf)
 		volume := context.String("v")
-		Run(tty, cmdArray, resConf, volume)
+		containerName := context.String("name")
+		Run(tty, cmdArray, resConf, volume, containerName)
 		return nil
 	},
 }
@@ -92,5 +97,14 @@ var initCommand = cli.Command{
 		log.Infof("command %s", cmd)
 		err := container.RunContainerInitProcess(cmd, nil)
 		return err
+	},
+}
+
+var listCommand = cli.Command{
+	Name:  "ps",
+	Usage: "list all the containers",
+	Action: func(context *cli.Context) error {
+		ListContainers()
+		return nil
 	},
 }

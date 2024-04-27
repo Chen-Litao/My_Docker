@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
-func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume string) {
+func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume, containerName string) {
+	containerId := container.GenerateContainerID() // 生成 10 位容器 id
+
 	parent, writePipe := container.NewParentProcess(tty, volume)
 	if parent == nil {
 		log.Errorf("New parent process error")
@@ -19,6 +21,11 @@ func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume
 		log.Error(err)
 	}
 
+	err := container.RecordContainerInfo(parent.Process.Pid, comArray, containerName, containerId)
+	if err != nil {
+		log.Errorf("Record container info error %v", err)
+		return
+	}
 	cgroupManager := cgroups.NewCgroupManager("mydocker-cgroup")
 	defer cgroupManager.Destroy()
 	_ = cgroupManager.Set(resConf)
