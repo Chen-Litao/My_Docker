@@ -32,6 +32,10 @@ var runCommand = cli.Command{
 			Name:  "v",
 			Usage: "volume limit,e.g.: -v /source/config:/target/config,", // 限制进程 cpu 使用率
 		},
+		cli.BoolFlag{
+			Name:  "d",
+			Usage: "detach container,run background",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -43,6 +47,14 @@ var runCommand = cli.Command{
 			cmdArray = append(cmdArray, arg)
 		}
 		tty := context.Bool("it")
+		detach := context.Bool("d")
+		if tty && detach {
+			return fmt.Errorf("it and d flag can not both provided")
+		}
+		if !detach { // 如果不是指定后台运行，就默认前台运行
+			tty = true
+		}
+		log.Infof("createTty %v", tty)
 		//flag后面的所有参数会被记录到这里
 		resConf := &subsystems.ResourceConfig{
 			MemoryLimit: context.String("mem"),

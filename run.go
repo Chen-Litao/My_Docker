@@ -18,13 +18,17 @@ func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume
 	if err := parent.Start(); err != nil {
 		log.Error(err)
 	}
-	sendInitCommand(comArray, writePipe)
+
 	cgroupManager := cgroups.NewCgroupManager("mydocker-cgroup")
 	defer cgroupManager.Destroy()
 	_ = cgroupManager.Set(resConf)
 	_ = cgroupManager.Apply(parent.Process.Pid)
-	_ = parent.Wait()
-	container.DeleteWorkSpace("/root/", volume)
+	sendInitCommand(comArray, writePipe)
+	if tty {
+		_ = parent.Wait()
+		container.DeleteWorkSpace("/root/", volume)
+	}
+
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {
