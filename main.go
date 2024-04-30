@@ -17,6 +17,8 @@ func main() {
 		runCommand,
 		commitCommand,
 		listCommand,
+		logCommand,
+		execCommand,
 	}
 	//设置log输出格式
 	app.Before = func(context *cli.Context) error {

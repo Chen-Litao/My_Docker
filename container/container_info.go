@@ -61,9 +61,14 @@ func RecordContainerInfo(containerPID int, commandArray []string, containerName,
 	}
 	return nil
 }
+
 func DeleteContainerInfo(containerID string) {
 	dirPath := fmt.Sprintf(InfoLocFormat, containerID)
 	if err := os.RemoveAll(dirPath); err != nil {
 		log.Errorf("Remove dir %s error %v", dirPath, err)
 	}
+}
+
+func GetLogfile(containerId string) string {
+	return fmt.Sprintf(LogFile, containerId)
 }

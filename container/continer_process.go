@@ -18,6 +18,7 @@ const (
 	InfoLocFormat = InfoLoc + "%s/"
 	ConfigName    = "config.json"
 	IDLength      = 10
+	LogFile       = "%s-json.log"
 )
 
 type Info struct {
@@ -30,7 +31,7 @@ type Info struct {
 }
 
 //创建一个新的实现隔离的容器进程
-func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume, containerId string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := os.Pipe()
 	if err != nil {
 		log.Errorf("New pipe error %v", err)
@@ -44,6 +45,22 @@ func NewParentProcess(tty bool, volume string) (*exec.Cmd, *os.File) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		dirPath := fmt.Sprintf(InfoLocFormat, containerId)
+
+		if err := os.MkdirAll(dirPath, constant.Perm0622); err != nil {
+			log.Errorf("NewParentProcess mkdir %s error %v", dirPath, err)
+			return nil, nil
+		}
+		stdLogFilePath := dirPath + GetLogfile(containerId)
+		stdLogFile, err := os.Create(stdLogFilePath)
+		if err != nil {
+			log.Errorf("NewParentProcess create file %s error %v", stdLogFilePath, err)
+			return nil, nil
+		}
+		cmd.Stdout = stdLogFile
+		cmd.Stderr = stdLogFile
+
 	}
 	cmd.ExtraFiles = []*os.File{readPipe}
 	rootPath := "/root"

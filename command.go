@@ -6,6 +6,7 @@ import (
 	"github.com/urfave/cli"
 	"myself_docker/cgroups/subsystems"
 	"myself_docker/container"
+	"os"
 )
 
 var runCommand = cli.Command{
@@ -105,6 +106,37 @@ var listCommand = cli.Command{
 	Usage: "list all the containers",
 	Action: func(context *cli.Context) error {
 		ListContainers()
+		return nil
+	},
+}
+var logCommand = cli.Command{
+	Name:  "logs",
+	Usage: "print logs of a container",
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("please input your container name")
+		}
+		containerName := context.Args().Get(0)
+		logContainer(containerName)
+		return nil
+	},
+}
+
+var execCommand = cli.Command{
+	Name:  "exec",
+	Usage: "exec a command into container",
+	Action: func(context *cli.Context) error {
+		if os.Getenv(EnvExecPid) != "" {
+			log.Infof("pid callback pid %v", os.Getgid())
+			return nil
+		}
+		if len(context.Args()) < 2 {
+			return fmt.Errorf("missing container name or command")
+		}
+		containerName := context.Args().Get(0)
+		// 将除了容器名之外的参数作为命令部分
+		commandArray := context.Args().Tail()
+		ExecContainer(containerName, commandArray)
 		return nil
 	},
 }
