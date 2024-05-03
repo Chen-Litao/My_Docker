@@ -33,7 +33,7 @@ type Info struct {
 }
 
 //创建一个新的实现隔离的容器进程
-func NewParentProcess(tty bool, volume, containerId, imageName string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volume, containerId, imageName string, envSlice []string) (*exec.Cmd, *os.File) {
 	readPipe, writePipe, err := os.Pipe()
 	if err != nil {
 		log.Errorf("New pipe error %v", err)
@@ -68,5 +68,6 @@ func NewParentProcess(tty bool, volume, containerId, imageName string) (*exec.Cm
 	NewWorkSpace(containerId, volume, imageName)
 	//表示最后交由用户看到的是merged这个目录
 	cmd.Dir = utils.GetMerged(containerId)
+	cmd.Env = append(os.Environ(), envSlice...)
 	return cmd, writePipe
 }

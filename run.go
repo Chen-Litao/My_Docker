@@ -9,10 +9,10 @@ import (
 	"strings"
 )
 
-func Run(tty bool, comArray []string, resConf *subsystems.ResourceConfig, volume, containerName, imageName string) {
+func Run(tty bool, envSlice, comArray []string, resConf *subsystems.ResourceConfig, volume, containerName, imageName string) {
 	containerId := container.GenerateContainerID() // 生成 10 位容器 id
 
-	parent, writePipe := container.NewParentProcess(tty, volume, containerId, imageName) //采用管道进行消息传递
+	parent, writePipe := container.NewParentProcess(tty, volume, containerId, imageName, envSlice) //采用管道进行消息传递
 	if parent == nil {
 		log.Errorf("New parent process error")
 		return
