@@ -51,6 +51,8 @@ var runCommand = cli.Command{
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
+		imageName := cmdArray[0]
+		cmdArray = cmdArray[1:]
 		tty := context.Bool("it")
 		detach := context.Bool("d")
 		if tty && detach {
@@ -69,26 +71,26 @@ var runCommand = cli.Command{
 		log.Info("resConf:", resConf)
 		volume := context.String("v")
 		containerName := context.String("name")
-		Run(tty, cmdArray, resConf, volume, containerName)
+		Run(tty, cmdArray, resConf, volume, containerName, imageName)
 		return nil
 	},
 }
 
 var commitCommand = cli.Command{
 	Name:  "commit",
-	Usage: "commit container to image",
+	Usage: "commit container to image,image,e.g. mydocker commit 123456789 myimage",
 	Action: func(context *cli.Context) error {
 		log.Infof("commit come on")
-		if len(context.Args()) < 1 {
+		if len(context.Args()) < 2 {
 			return fmt.Errorf("missing image name")
 		}
-		imageName := context.Args().Get(0)
+		containerID := context.Args().Get(0)
+		imageName := context.Args().Get(1)
 		log.Infof("command %s", imageName)
-		err := container.CommitContainer(imageName)
+		err := container.CommitContainer(containerID, imageName)
 		return err
 	},
 }
-
 var initCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
@@ -96,11 +98,10 @@ var initCommand = cli.Command{
 		log.Infof("init come on")
 		cmd := context.Args().Get(0)
 		log.Infof("command %s", cmd)
-		err := container.RunContainerInitProcess(cmd, nil)
+		err := container.RunContainerInitProcess()
 		return err
 	},
 }
-
 var listCommand = cli.Command{
 	Name:  "ps",
 	Usage: "list all the containers",
@@ -121,7 +122,6 @@ var logCommand = cli.Command{
 		return nil
 	},
 }
-
 var execCommand = cli.Command{
 	Name:  "exec",
 	Usage: "exec a command into container",
@@ -140,7 +140,6 @@ var execCommand = cli.Command{
 		return nil
 	},
 }
-
 var stopCommand = cli.Command{
 	Name:  "stop",
 	Usage: "stop a container,e.g. mydocker stop 1234567890",
@@ -151,6 +150,26 @@ var stopCommand = cli.Command{
 		}
 		containerName := context.Args().Get(0)
 		stopContainer(containerName)
+		return nil
+	},
+}
+
+var removeCommand = cli.Command{
+	Name:  "rm",
+	Usage: "remove unused containers,e.g. mydocker rm 1234567890",
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "f",
+			Usage: "force delete running container",
+		},
+	},
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("missing container id")
+		}
+		containerId := context.Args().Get(0)
+		force := context.Bool("f")
+		removeContainer(containerId, force)
 		return nil
 	},
 }

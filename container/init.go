@@ -12,9 +12,7 @@ import (
 )
 
 //容器进程里面启动的第一个程序，目的是将当前的运行目录改为command
-func RunContainerInitProcess(command string, args []string) error {
-
-	log.Infof("command:%s", command)
+func RunContainerInitProcess() error {
 	cmdArray := readUserCommand()
 	if len(cmdArray) == 0 {
 		return errors.New("run container get user command error, cmdArray is nil")
