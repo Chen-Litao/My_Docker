@@ -19,6 +19,7 @@ type IPAM struct {
 }
 
 // 初始化一个IPAM的对象，默认使用/var/lib/mydocker/network/ipam/subnet.json作为分配信息存储位置
+//主要是存储位图
 var ipAllocator = &IPAM{
 	SubnetAllocatorPath: ipamDefaultAllocatorPath,
 }
@@ -64,7 +65,7 @@ func (ipam *IPAM) Allocate(subnet *net.IPNet) (ip net.IP, err error) {
 	return
 }
 
-//load 加载网段地址分配信息
+//load 加载网段地址分配信息——————加载位图
 func (ipam *IPAM) load() error {
 	if _, err := os.Stat(ipam.SubnetAllocatorPath); err != nil {
 		if !os.IsNotExist(err) {
@@ -88,6 +89,7 @@ func (ipam *IPAM) load() error {
 	return errors.Wrap(err, "err dump allocation info")
 }
 
+// dump 存储网段地址分配信息存储的是“ 位图 ”
 func (ipam *IPAM) dump() error {
 	ipamConfigFileDir, _ := path.Split(ipam.SubnetAllocatorPath)
 	//判断当前目录是否存在
@@ -111,4 +113,35 @@ func (ipam *IPAM) dump() error {
 	}
 	_, err = subnetConfigFile.Write(ipamConfigJson)
 	return err
+}
+
+func (ipam *IPAM) Release(subnet *net.IPNet, ipaddr *net.IP) error {
+	ipam.Subnets = &map[string]string{}
+	_, subnet, _ = net.ParseCIDR(subnet.String())
+
+	err := ipam.load()
+	if err != nil {
+
+		return errors.Wrap(err, "load subnet allocation info error")
+	}
+
+	c := 0
+	releaseIP := ipaddr.To4()
+	//因为在分配时+1所以在这里需要-1
+	releaseIP[3] -= 1
+	//根据网段和真实ip计算位图中的位置
+	for t := uint(4); t > 0; t -= 1 {
+		c += int(releaseIP[t-1]-subnet.IP[t-1]) << ((4 - t) * 8)
+	}
+	ipalloc := []byte((*ipam.Subnets)[subnet.String()])
+	ipalloc[c] = '0'
+	(*ipam.Subnets)[subnet.String()] = string(ipalloc)
+
+	// 最后调用dump将分配结果保存到文件中
+	err = ipam.dump()
+	if err != nil {
+		log.Error("Allocate：dump ipam error", err)
+	}
+	return nil
+
 }

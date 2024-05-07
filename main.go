@@ -21,6 +21,7 @@ func main() {
 		execCommand,
 		stopCommand,
 		removeCommand,
+		networkCommand,
 	}
 	//设置log输出格式
 	app.Before = func(context *cli.Context) error {

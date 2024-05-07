@@ -6,6 +6,7 @@ import (
 	"github.com/urfave/cli"
 	"myself_docker/cgroups/subsystems"
 	"myself_docker/container"
+	"myself_docker/network"
 	"os"
 )
 
@@ -69,9 +70,12 @@ var runCommand = cli.Command{
 			CpuCfsQuota: context.Int("cpu"),
 		}
 		log.Info("resConf:", resConf)
+
 		volume := context.String("v")
 		containerName := context.String("name")
-		Run(tty, cmdArray, resConf, volume, containerName, imageName)
+		envSlice := context.StringSlice("e")
+
+		Run(tty, envSlice, cmdArray, resConf, volume, containerName, imageName)
 		return nil
 	},
 }
@@ -91,6 +95,7 @@ var commitCommand = cli.Command{
 		return err
 	},
 }
+
 var initCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
@@ -102,6 +107,7 @@ var initCommand = cli.Command{
 		return err
 	},
 }
+
 var listCommand = cli.Command{
 	Name:  "ps",
 	Usage: "list all the containers",
@@ -110,6 +116,7 @@ var listCommand = cli.Command{
 		return nil
 	},
 }
+
 var logCommand = cli.Command{
 	Name:  "logs",
 	Usage: "print logs of a container",
@@ -122,6 +129,7 @@ var logCommand = cli.Command{
 		return nil
 	},
 }
+
 var execCommand = cli.Command{
 	Name:  "exec",
 	Usage: "exec a command into container",
@@ -140,6 +148,7 @@ var execCommand = cli.Command{
 		return nil
 	},
 }
+
 var stopCommand = cli.Command{
 	Name:  "stop",
 	Usage: "stop a container,e.g. mydocker stop 1234567890",
@@ -171,5 +180,50 @@ var removeCommand = cli.Command{
 		force := context.Bool("f")
 		removeContainer(containerId, force)
 		return nil
+	},
+}
+
+var networkCommand = cli.Command{
+	Name:  "network",
+	Usage: "container creat network command",
+	Subcommands: []cli.Command{
+		{
+			Name:  "create",
+			Usage: "create a container network",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "driver",
+					Usage: "network driver",
+				},
+				cli.StringFlag{
+					Name:  "subnet",
+					Usage: "network subnet",
+				},
+			},
+			Action: func(context *cli.Context) error {
+				if len(context.Args()) < 1 {
+					return fmt.Errorf("missing network name")
+				}
+				//获取驱动连接类型
+				driver := context.String("driver")
+				//获取分配给驱动的网段
+				subnet := context.String("subnet")
+				//创建的驱动名称
+				name := context.Args()[0]
+				err := network.CreateNetwork(driver, subnet, name)
+				if err != nil {
+					return fmt.Errorf("create network error: %+v", err)
+				}
+				return nil
+			},
+		},
+		{
+			Name:  "list",
+			Usage: "list container network",
+			Action: func(context *cli.Context) error {
+				network.ListNetwork()
+				return nil
+			},
+		},
 	},
 }
