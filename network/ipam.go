@@ -118,7 +118,7 @@ func (ipam *IPAM) dump() error {
 func (ipam *IPAM) Release(subnet *net.IPNet, ipaddr *net.IP) error {
 	ipam.Subnets = &map[string]string{}
 	_, subnet, _ = net.ParseCIDR(subnet.String())
-
+	//在load上会重新将ipam.Subnets这个
 	err := ipam.load()
 	if err != nil {
 

@@ -23,7 +23,6 @@ func init() {
 	// 加载网络驱动
 	var bridgeDriver = BridgeNetworkDriver{}
 	drivers[bridgeDriver.Name()] = &bridgeDriver
-
 	// 文件不存在则创建
 	if _, err := os.Stat(defaultNetworkPath); err != nil {
 		if !os.IsNotExist(err) {
@@ -35,6 +34,28 @@ func init() {
 			return
 		}
 	}
+}
+
+func DeleteNetwork(networkName string) error {
+	//读取相关数据
+	networks, err := loadNetwork()
+	if err != nil {
+		return errors.WithMessage(err, "load network from file failed")
+	}
+	//获得与之匹配的相关数据
+	net, ok := networks[networkName]
+	if !ok {
+		return fmt.Errorf("no Such Network: %s", networkName)
+	}
+	//释放的由该网段分配出去的IP
+	if err = ipAllocator.Release(net.IPRange, &net.IPRange.IP); err != nil {
+		return errors.Wrap(err, "remove Network gateway ip failed")
+	}
+	if err = drivers[net.Driver].Delete(net.Name); err != nil {
+		return errors.Wrap(err, "remove Network DriverError failed")
+	}
+	// 最后从网络的配直目录中删除该网络对应的配置文件
+	return net.remove(defaultNetworkPath)
 }
 
 //创建driver的时候会调用这个函数
@@ -143,4 +164,17 @@ func (net *Network) load(dumpPath string) error {
 
 	err = json.Unmarshal(netJson[:n], net)
 	return errors.Wrapf(err, "unmarshal %s failed", netJson[:n])
+}
+
+func (net *Network) remove(dumpPath string) error {
+	// 检查网络对应的配置文件状态，如果文件己经不存在就直接返回
+	fullPath := path.Join(dumpPath, net.Name)
+	if _, err := os.Stat(fullPath); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
+	// 否则删除这个网络对应的配置文件
+	return os.Remove(fullPath)
 }
