@@ -9,4 +9,4 @@
     1. 容器的创建（Namespace隔离、cgroup 资源限制、rootfs文件系统）
     2. 网络相关（创建虚拟网桥、IP分配、设置SNAT和DNAT）
 流程图如下：
-![Docker项目梳理](https://github.com/Chen-Litao/My_Docker/assets/138087482/a348c1ba-a16f-431a-ba53-a0aa1c5ff1bd)
+![Uploading Docker项目梳理.png…]()
