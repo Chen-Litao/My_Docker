@@ -11,3 +11,6 @@
 流程图如下：
 
 ![Docker项目梳理](https://github.com/Chen-Litao/My_Docker/assets/138087482/6080f040-b481-4010-ac85-4d7625107b71)
+
+所有文件信息保存结构：
+![Docker项目梳理 (2)](https://github.com/Chen-Litao/My_Docker/assets/138087482/14dd217e-be43-4189-a634-4ce34d772b47)
