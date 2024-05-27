@@ -5,11 +5,13 @@ import (
 	"myself_docker/cgroups"
 	"myself_docker/cgroups/subsystems"
 	"myself_docker/container"
+	"myself_docker/network"
 	"os"
+	"strconv"
 	"strings"
 )
 
-func Run(tty bool, envSlice, comArray []string, resConf *subsystems.ResourceConfig, volume, containerName, imageName string) {
+func Run(tty bool, envSlice, comArray []string, resConf *subsystems.ResourceConfig, volume, containerName, imageName string, net string, portMapping []string) {
 	containerId := container.GenerateContainerID() // 生成 10 位容器 id
 
 	parent, writePipe := container.NewParentProcess(tty, volume, containerId, imageName, envSlice) //采用管道进行消息传递
@@ -31,6 +33,20 @@ func Run(tty bool, envSlice, comArray []string, resConf *subsystems.ResourceConf
 	defer cgroupManager.Destroy()
 	_ = cgroupManager.Set(resConf)
 	_ = cgroupManager.Apply(parent.Process.Pid)
+
+	if net != "" {
+		// config container network
+		containerInfo := &container.Info{
+			Id:          containerId,
+			Pid:         strconv.Itoa(parent.Process.Pid),
+			Name:        containerName,
+			PortMapping: portMapping,
+		}
+		if _, err = network.Connect(net, containerInfo); err != nil {
+			log.Errorf("Error Connect Network %v", err)
+			return
+		}
+	}
 
 	sendInitCommand(comArray, writePipe)
 	if tty {

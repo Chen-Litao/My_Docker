@@ -42,6 +42,14 @@ var runCommand = cli.Command{
 			Name:  "name",
 			Usage: "container name",
 		},
+		cli.StringFlag{
+			Name:  "net",
+			Usage: "container network，e.g. -net testbr",
+		},
+		cli.StringSliceFlag{
+			Name:  "p",
+			Usage: "port mapping,e.g. -p 8080:80 -p 30336:3306",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
@@ -62,6 +70,8 @@ var runCommand = cli.Command{
 		if !detach { // 如果不是指定后台运行，就默认前台运行
 			tty = true
 		}
+		network := context.String("net")
+		portMapping := context.StringSlice("p")
 		log.Infof("createTty %v", tty)
 		//flag后面的所有参数会被记录到这里
 		resConf := &subsystems.ResourceConfig{
@@ -75,7 +85,7 @@ var runCommand = cli.Command{
 		containerName := context.String("name")
 		envSlice := context.StringSlice("e")
 
-		Run(tty, envSlice, cmdArray, resConf, volume, containerName, imageName)
+		Run(tty, envSlice, cmdArray, resConf, volume, containerName, imageName, network, portMapping)
 		return nil
 	},
 }
